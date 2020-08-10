@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./App.css";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
+  const paginationSentinel = useRef();
+  const observer = useRef({});
 
   useEffect(() => {
     async function fetchUsers() {
@@ -13,12 +15,34 @@ function App() {
       setUsers((currentUsers) => [...currentUsers, ...json]);
     }
 
-    fetchUsers();
+    setTimeout(fetchUsers, Math.floor(Math.random() * 1000));
   }, [page]);
+
+  useEffect(() => {
+    let options = {
+      rootMargin: "0px",
+      threshold: 1.0,
+    };
+
+    observer.current = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        console.log(entry);
+        if (entry.isIntersecting) {
+          paginate();
+        }
+      });
+    }, options);
+
+    const { current: currentObserver } = observer;
+
+    currentObserver.observe(paginationSentinel.current);
+  }, []);
 
   function paginate() {
     setPage((currentPage) => currentPage + 1);
   }
+
+  console.log(observer);
 
   return (
     <div className="App">
@@ -33,6 +57,7 @@ function App() {
           ))}
         </ul>
 
+        <div ref={paginationSentinel} className="PaginationSentinel" />
         <button onClick={paginate}>Load more</button>
       </div>
     </div>
