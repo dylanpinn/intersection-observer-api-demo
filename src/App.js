@@ -1,24 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
 function App() {
+  const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      const result = await fetch(`http://localhost:3000/users?_page=${page}`);
+      const json = await result.json();
+
+      setUsers((currentUsers) => [...currentUsers, ...json]);
+    }
+
+    fetchUsers();
+  }, [page]);
+
+  function paginate() {
+    setPage((currentPage) => currentPage + 1);
+  }
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Users</h1>
       </header>
+
+      <div className="Users">
+        <ul>
+          {users.map((user) => (
+            <li key={user.email}>{user.name}</li>
+          ))}
+        </ul>
+
+        <button onClick={paginate}>Load more</button>
+      </div>
     </div>
   );
 }
