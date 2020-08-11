@@ -21,16 +21,22 @@ function App() {
       }
     }
 
+    // Simulate time for network request.
     setTimeout(fetchUsers, Math.floor(Math.random() * 1000));
   }, [page]);
 
   useEffect(() => {
+    // Load more once 25% of the target is visible.
     let options = {
       rootMargin: "0px",
       threshold: 0.25,
     };
 
+    /*
+     * new IntersectionObserver(callback, options);
+     */
     observer.current = new IntersectionObserver((entries) => {
+      // entries is an array as can observe multiple elements.
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           loadMore();
@@ -40,8 +46,10 @@ function App() {
 
     const { current: currentObserver } = observer;
 
+    // Watch the pagination sentinel.
     currentObserver.observe(paginationSentinel.current);
 
+    // Cleanup when the component is unmounted.
     return () => {
       const { current: currentObserver } = observer;
 
