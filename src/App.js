@@ -9,10 +9,16 @@ function App() {
 
   useEffect(() => {
     async function fetchUsers() {
-      const result = await fetch(`http://localhost:3000/users?_page=${page}`);
-      const json = await result.json();
+      try {
+        const result = await fetch(
+          `http://localhost:3000/users?_page=${page}&_limit=50`
+        );
+        const json = await result.json();
 
-      setUsers((currentUsers) => [...currentUsers, ...json]);
+        setUsers((currentUsers) => [...currentUsers, ...json]);
+      } catch (e) {
+        console.error("Should do something about this: ", e);
+      }
     }
 
     setTimeout(fetchUsers, Math.floor(Math.random() * 1000));
@@ -21,14 +27,13 @@ function App() {
   useEffect(() => {
     let options = {
       rootMargin: "0px",
-      threshold: 1.0,
+      threshold: 0.25,
     };
 
     observer.current = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        console.log(entry);
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          paginate();
+          loadMore();
         }
       });
     }, options);
@@ -36,13 +41,17 @@ function App() {
     const { current: currentObserver } = observer;
 
     currentObserver.observe(paginationSentinel.current);
+
+    return () => {
+      const { current: currentObserver } = observer;
+
+      currentObserver.unobserve(currentObserver);
+    };
   }, []);
 
-  function paginate() {
+  function loadMore() {
     setPage((currentPage) => currentPage + 1);
   }
-
-  console.log(observer);
 
   return (
     <div className="App">
@@ -51,14 +60,13 @@ function App() {
       </header>
 
       <div className="Users">
-        <ul>
+        <ul style={{ minHeight: "100vh" }}>
           {users.map((user) => (
             <li key={user.email}>{user.name}</li>
           ))}
         </ul>
 
         <div ref={paginationSentinel} className="PaginationSentinel" />
-        <button onClick={paginate}>Load more</button>
       </div>
     </div>
   );
