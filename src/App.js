@@ -11,7 +11,7 @@ function App() {
     async function fetchUsers() {
       try {
         const result = await fetch(
-          `http://localhost:3000/users?_page=${page}&_limit=50`
+          `http://localhost:3000/users?_page=${page}&_limit=40`
         );
         const json = await result.json();
 
@@ -68,14 +68,16 @@ function App() {
       </header>
 
       <div className="Users">
-        <ul className="UsersList">
-          {users.map((user) => (
-            <li key={user.email}>{user.name}</li>
-          ))}
-        </ul>
-
-        <div ref={paginationSentinel} className="PaginationSentinel" />
+        {users.map((user) => (
+          <div key={user.email} className="User">
+            <img src={user.image} alt={user.name} />
+            <p>{user.name}</p>
+            <p>{user.job}</p>
+          </div>
+        ))}
       </div>
+
+      <div ref={paginationSentinel} className="PaginationSentinel" />
     </div>
   );
 }

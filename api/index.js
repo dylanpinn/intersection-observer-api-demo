@@ -13,7 +13,7 @@
     email: faker.internet.email(),
     salary: "$" + faker.finance.amount() + "M",
     // You can also use faker.image.people() for image
-    image: "https://source.unsplash.com/1600x900/?user", 
+    image: "https://picsum.photos/300/200", 
     country: faker.address.country()
   });
  }
