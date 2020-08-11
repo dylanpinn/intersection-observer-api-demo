@@ -60,7 +60,7 @@ function App() {
       </header>
 
       <div className="Users">
-        <ul style={{ minHeight: "100vh" }}>
+        <ul className="UsersList">
           {users.map((user) => (
             <li key={user.email}>{user.name}</li>
           ))}
