@@ -1,22 +1,63 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./App.css";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
+  const paginationSentinel = useRef();
+  const observer = useRef({});
 
   useEffect(() => {
     async function fetchUsers() {
-      const result = await fetch(`http://localhost:3000/users?_page=${page}`);
-      const json = await result.json();
+      try {
+        const result = await fetch(
+          `http://localhost:3000/users?_page=${page}&_limit=50`
+        );
+        const json = await result.json();
 
-      setUsers((currentUsers) => [...currentUsers, ...json]);
+        setUsers((currentUsers) => [...currentUsers, ...json]);
+      } catch (e) {
+        console.error("Should do something about this: ", e);
+      }
     }
 
-    fetchUsers();
+    // Simulate time for network request.
+    setTimeout(fetchUsers, Math.floor(Math.random() * 1000));
   }, [page]);
 
-  function paginate() {
+  useEffect(() => {
+    // Load more once 25% of the target is visible.
+    let options = {
+      rootMargin: "0px",
+      threshold: 0.25,
+    };
+
+    /*
+     * new IntersectionObserver(callback, options);
+     */
+    observer.current = new IntersectionObserver((entries) => {
+      // entries is an array as can observe multiple elements.
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          loadMore();
+        }
+      });
+    }, options);
+
+    const { current: currentObserver } = observer;
+
+    // Watch the pagination sentinel.
+    currentObserver.observe(paginationSentinel.current);
+
+    // Cleanup when the component is unmounted.
+    return () => {
+      const { current: currentObserver } = observer;
+
+      currentObserver.unobserve(currentObserver);
+    };
+  }, []);
+
+  function loadMore() {
     setPage((currentPage) => currentPage + 1);
   }
 
@@ -27,13 +68,13 @@ function App() {
       </header>
 
       <div className="Users">
-        <ul>
+        <ul className="UsersList">
           {users.map((user) => (
             <li key={user.email}>{user.name}</li>
           ))}
         </ul>
 
-        <button onClick={paginate}>Load more</button>
+        <div ref={paginationSentinel} className="PaginationSentinel" />
       </div>
     </div>
   );

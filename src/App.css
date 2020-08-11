@@ -9,3 +9,11 @@
   color: white;
 }
 
+.PaginationSentinel {
+  height: 50px;
+  background: cornflowerblue;
+}
+
+.UsersList {
+  min-height: 95vh;
+}
